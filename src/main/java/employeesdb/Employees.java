@@ -1,11 +1,9 @@
 package employeesdb;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name="employees")
@@ -29,27 +27,45 @@ public class Employees {
     @Column(name= "hire_date")
     private LocalDate hireDate;
 
-    public int getEmpNo() {return empNo; }
+    @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
+    private List<Salaries> salary;
 
+    public Employees() {}
+
+    public Employees(int empNo, LocalDate fromDate, char gender, LocalDate hireDate) {
+        this.empNo = empNo;
+        this.birthDate = fromDate;
+        this.gender = gender;
+        this.hireDate = hireDate;
+    }
+
+    public int getEmpNo() {return empNo; }
     public void setEmpNo(int empNo) {this.empNo = empNo;}
 
     public LocalDate getBirthDate() {return birthDate;}
-
     public void setBirthDate(LocalDate birthDate) {this.birthDate = birthDate;}
 
     public String getFirstName() {return firstName;}
-
     public void setFirstName(String firstName) {this.firstName = firstName;}
 
     public String getLastName() {return lastName;}
-
     public void setLastName(String lastName) {this.lastName = lastName;}
 
     public char getGender() {return gender;}
-
     public void setGender(char gender) {this.gender = gender;}
 
     public LocalDate getHireDate() {return hireDate;}
-
     public void setHireDate(LocalDate hireDate) {this.hireDate = hireDate;}
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(String.format("\nEmployee{" + "id= "+empNo + "}\n"));
+        for (Salaries salary : this.salary) {
+            builder.append(salary.toString());
+            builder.append("\n");
+        }
+
+        return builder.toString();
+    }
 }
