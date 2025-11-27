@@ -30,6 +30,9 @@ public class Employees {
     @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
     private List<Salaries> salary;
 
+    @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
+    private List<Titles> title;
+
     public Employees() {}
 
     public Employees(int empNo, LocalDate fromDate, char gender, LocalDate hireDate) {
