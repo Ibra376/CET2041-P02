@@ -23,6 +23,22 @@ public class EmployeeRecords {
     @Path("/ping")
     public Response ping() { return Response.ok().entity("Service online").build(); }
 
+    // Endpoint 2: return full employee record
+    @GET
+    @Path("/{empNo}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getEmployee(@PathParam("empNo") int empNo) {
+        Employees emp = em.find(Employees.class, empNo);
+
+        if (emp == null) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("{\"error\":\"Employee not found\"}")
+                    .build();
+        }
+
+        return Response.ok(emp).build();
+    }
+
     @GET
     @Path ("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
