@@ -1,5 +1,9 @@
 package restAPI;
 
+import employeesdb.Employees;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -12,8 +16,33 @@ import jakarta.ws.rs.core.Response;
 @Path("/records")
 public class EmployeeRecords {
 
+    @PersistenceContext
+    private EntityManager em;
+
     @GET
     @Path("/ping")
     public Response ping() { return Response.ok().entity("Service online").build(); }
+
+    @GET
+    @Path ("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getEmployee(@PathParam("id") String empNo) {
+        Employees emp = em.find(Employees.class, empNo);
+        if (emp == null) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("{\"error\":\"Department not found\"}")
+                    .build();
+        }
+        return Response.ok(emp).build();
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Transactional
+    public Response createDepartment(Employees emp) {
+        em.persist(emp);
+        return Response.status(Response.Status.CREATED).entity(emp).build();
+    }
 
 }

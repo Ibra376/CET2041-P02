@@ -14,6 +14,7 @@ public class EmployeeRecordsApp extends Application {
     public Set<Class<?>> getClasses() {
         Set<Class<?>> s = new HashSet<Class<?>>();
         s.add(EmployeeRecords.class);
+        s.add(DepartmentRecords.class);
         return s;
     }
 

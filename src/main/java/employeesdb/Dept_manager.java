@@ -43,9 +43,18 @@ public class Dept_manager {
     public LocalDate getToDate() { return toDate; }
     public void setToDate(LocalDate toDate) { this.toDate = toDate; }
 
+    public Employees getEmployee() { return employee; }
+    public void setEmployee(Employees employee) { this.employee = employee; }
+
+    public Departments getDepartment() { return department; }
+    public void setDepartment(Departments department) { this.department = department; }
+
+    @Override
     public String toString() {
-        return "From: "+fromDate+", To: "+toDate+", EmpNo: "+id.getEmpNo()+"," +
-                " DeptNo: "+id.getDeptNo();
+        return "From: " + fromDate +
+                ", To: " + toDate +
+                ", EmpNo: " + (id != null ? id.getEmpNo() : "null") +
+                ", DeptNo: " + (id != null ? id.getDeptNo() : "null");
     }
 
     @Embeddable

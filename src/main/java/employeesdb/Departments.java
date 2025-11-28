@@ -13,11 +13,13 @@ public class Departments {
     @Column(name = "dept_name")
     private String deptName;
 
-    @OneToMany(mappedBy = "dept_no", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade =
+            CascadeType.ALL,  orphanRemoval = true)
     private List<Dept_manager> dept_manager;
 
-    @OneToMany(mappedBy = "emp_no", fetch = FetchType.LAZY)
-    private List<Dept_emp>  dept_emp;
+    @OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade =
+            CascadeType.ALL,  orphanRemoval = true)
+    private List<Dept_emp> dept_emp;
 
     public Departments() {}
 
@@ -26,33 +28,31 @@ public class Departments {
         this.deptName = deptName;
     }
 
-    public String getDeptNo() {
-        return deptNo;
-    }
+    public String getDeptNo() { return deptNo; }
+    public void setDeptNo(String deptNo) { this.deptNo = deptNo; }
 
-    public void setDeptNo(String deptNo) {
-        this.deptNo = deptNo;
-    }
+    public String getDeptName() { return deptName; }
+    public void setDeptName(String deptName) { this.deptName = deptName; }
 
-    public String getDeptName() {
-        return deptName;
-    }
+    public List<Dept_manager> getDept_manager() { return dept_manager; }
+    public void setDept_manager(List<Dept_manager> dept_manager) { this.dept_manager = dept_manager; }
 
-    public void setDeptName(String deptName) {
-        this.deptName = deptName;
-    }
+    public List<Dept_emp> getDept_emp() { return dept_emp; }
+    public void setDept_emp(List<Dept_emp> dept_emp) { this.dept_emp = dept_emp; }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append(String.format("\nDepartment{ id=%s, name=%s }\n", deptNo, deptName));
-        for (Dept_manager dept_manager : this.dept_manager) {
-            builder.append(dept_manager.toString());
-            builder.append("\n");
+        if (dept_manager != null) {
+            for (Dept_manager dm : dept_manager) {
+                builder.append(dm.toString()).append("\n");
+            }
         }
-        for (Dept_emp dept_emp : this.dept_emp) {
-            builder.append(dept_emp.toString());
-            builder.append("\n");
+        if (dept_emp != null) {
+            for (Dept_emp de : dept_emp) {
+                builder.append(de.toString()).append("\n");
+            }
         }
         return builder.toString();
     }
