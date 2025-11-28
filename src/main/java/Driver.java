@@ -13,17 +13,12 @@ public class Driver {
     public static void main(String[] args) {
         try (EntityManagerFactory emf = Persistence.createEntityManagerFactory(
                 "EmployeeService")){
-//            EntityManager em = emf.createEntityManager();
-//            em.getTransaction().begin();
-////            DeptDAO deptDAO = new DeptDAO(em);
-////
-////            Departments dept = deptDAO.findDept("d001");
-//
-//
-//            EmployeeDAO employeeDAO = new EmployeeDAO(em);
-//            Employees employees = employeeDAO.findEmployee(10001);
-//
-//            em.close();
+            EntityManager em = emf.createEntityManager();
+            EmployeeDAO employeeDAO = new EmployeeDAO(em);
+            Employees employees = employeeDAO.findEmployee(10001);
+            System.out.println(employees);
+
+            em.close();
         }
 
     }

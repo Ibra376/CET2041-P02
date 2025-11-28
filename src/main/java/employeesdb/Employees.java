@@ -6,8 +6,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 
-;
-
 @Entity
 @Table(name="employees")
 public class Employees {
@@ -36,6 +34,12 @@ public class Employees {
 
     @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
     private List<Titles> title;
+
+    @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
+    private List<Dept_emp>  dept_emp;
+
+    @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
+    private List<Dept_manager>  dept_manager;
 
     public Employees() {}
 
