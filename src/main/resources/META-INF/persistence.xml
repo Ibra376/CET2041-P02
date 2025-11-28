@@ -13,15 +13,22 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
 <!--        <class>-->
-
-<!--        </class>-->
+        <class>employeesdb.Departments</class>
+        <class>employeesdb.Employees</class>
+        <class>employeesdb.Dept_emp</class>
+        <class>employeesdb.Dept_manager</class>
+        <class>employeesdb.Salaries</class>
+        <class>employeesdb.SalariesId</class>
+        <class>employeesdb.Titles</class>
+        <class>employeesdb.TitlesId</class>
+        <!--        </class>-->
 
         <properties>
             <!-- JDBC connection -->
             <property name="jakarta.persistence.jdbc.driver" value="org.mariadb.jdbc.Driver"/>
             <property name="jakarta.persistence.jdbc.url" value="jdbc:mariadb://localhost:3306/employees"/>
             <property name="jakarta.persistence.jdbc.user" value="root"/>
-            <property name="jakarta.persistence.jdbc.password" value="root"/>
+            <property name="jakarta.persistence.jdbc.password" value="140391"/>
 
             <!-- Hibernate settings -->
             <property name="hibernate.dialect" value="org.hibernate.dialect.MariaDBDialect"/>
