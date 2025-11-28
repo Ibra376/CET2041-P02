@@ -10,6 +10,11 @@ import java.util.Objects;
 public class Dept_emp {
 
     @EmbeddedId
+    @AttributeOverrides({
+            @AttributeOverride(name = "empNo", column = @Column(name = "emp_no")),
+            @AttributeOverride(name = "deptNo", column = @Column(name = "dept_no", length = 4, columnDefinition =
+                    "CHAR(4)"))
+    })
     private DeptEmpId id;
 
     @Column(name = "from_date")
@@ -63,7 +68,7 @@ public class Dept_emp {
         @Column(name = "emp_no")
         private int empNo;
 
-        @Column(name = "dept_no")
+        @Column(name = "dept_no", length = 4, columnDefinition = "CHAR(4)")
         private String deptNo;
 
         public DeptEmpId() {}

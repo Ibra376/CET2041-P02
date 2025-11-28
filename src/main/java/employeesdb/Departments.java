@@ -7,7 +7,7 @@ import java.util.List;
 @Table(name = "departments")
 public class Departments {
     @Id
-    @Column(name = "dept_no")
+    @Column(name = "dept_no", length = 4, columnDefinition = "CHAR(4)")
     private String deptNo;
 
     @Column(name = "dept_name")

@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
 
+
+;
+
 @Entity
 @Table(name="employees")
 public class Employees {
@@ -22,7 +25,8 @@ public class Employees {
     private String lastName;
 
     @Column(name = "gender")
-    private char gender;
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
 
     @Column(name= "hire_date")
     private LocalDate hireDate;
@@ -35,7 +39,7 @@ public class Employees {
 
     public Employees() {}
 
-    public Employees(int empNo, LocalDate fromDate, char gender, LocalDate hireDate) {
+    public Employees(int empNo, LocalDate fromDate, Gender gender, LocalDate hireDate) {
         this.empNo = empNo;
         this.birthDate = fromDate;
         this.gender = gender;
@@ -54,8 +58,8 @@ public class Employees {
     public String getLastName() {return lastName;}
     public void setLastName(String lastName) {this.lastName = lastName;}
 
-    public char getGender() {return gender;}
-    public void setGender(char gender) {this.gender = gender;}
+    public Gender getGender() {return gender;}
+    public void setGender(Gender gender) {this.gender = gender;}
 
     public LocalDate getHireDate() {return hireDate;}
     public void setHireDate(LocalDate hireDate) {this.hireDate = hireDate;}

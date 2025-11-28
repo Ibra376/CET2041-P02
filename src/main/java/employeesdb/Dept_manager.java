@@ -11,6 +11,11 @@ public class Dept_manager {
 
     @EmbeddedId
     private DeptManagerId id;
+    @AttributeOverrides({
+            @AttributeOverride(name = "empNo", column = @Column(name = "emp_no")),
+            @AttributeOverride(name = "deptNo", column = @Column(name = "dept_no", length = 4, columnDefinition =
+                    "CHAR(4)"))
+    })
 
     @Column(name = "from_date")
     private LocalDate fromDate;
@@ -60,7 +65,7 @@ public class Dept_manager {
     @Embeddable
     public static class DeptManagerId implements Serializable {
 
-        @Column(name = "dept_no")
+        @Column(name = "dept_no", length = 4, columnDefinition = "CHAR(4)")
         private String deptNo;
 
         @Column(name = "emp_no")

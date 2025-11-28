@@ -2,19 +2,15 @@ package employeesdb;
 
 import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity
-@IdClass(SalariesId.class)
 @Table(name="salaries")
 public class Salaries {
-    @Id
-    @Column(name = "emp_no")
-    private int empNo;
-
-    @Id
-    @Column(name = "from_date")
-    private LocalDate fromDate;
+    @EmbeddedId
+    private SalariesId salariesId;
 
     @Column(name = "salary")
     private int salary;
@@ -23,23 +19,18 @@ public class Salaries {
     private LocalDate toDate;
 
     @ManyToOne
-    @JoinColumn(name="empNo", referencedColumnName = "emp_no")
+    @JoinColumn(name="emp_no", insertable=false, updatable=false )
     private Employees employee;
 
     public Salaries() {}
 
-    public Salaries(int empNo, LocalDate fromDate, int salary, Employees employee) {
-        this.empNo = empNo;
-        this.fromDate = fromDate;
+    public Salaries(SalariesId salariesId, int salary, LocalDate toDate, Employees employee) {
+        this.salariesId = salariesId;
         this.salary = salary;
+        this.toDate = toDate;
         this.employee = employee;
     }
 
-    public int getEmpNo() { return empNo; }
-    public void setEmpNo(int empNo) { this.empNo = empNo; }
-
-    public LocalDate getFromDate() { return fromDate; }
-    public void setFromDate(LocalDate fromDate) { this.fromDate = fromDate; }
 
     public int getSalary() { return salary; }
     public void setSalary(int salary) { this.salary = salary; }
@@ -52,6 +43,42 @@ public class Salaries {
 
     @Override
     public String toString() {
-        return "From: "+fromDate+", To: "+toDate+", Salary: "+salary;
+        return "From: "+salariesId.fromDate+", To: "+toDate+", Salary: "+salary;
+    }
+
+    @Embeddable
+    public static class SalariesId implements Serializable
+    {
+        @Column(name = "emp_no")
+        private int empNo;
+
+        @Column(name = "from_date")
+        private LocalDate fromDate;
+
+        public SalariesId() {}
+
+        public SalariesId(int empNo, LocalDate fromDate) {
+            this.empNo = empNo;
+            this.fromDate = fromDate;
+        }
+
+        public int getEmpNo() { return empNo; }
+        public void setEmpNo(int empNo) { this.empNo = empNo; }
+
+        public LocalDate getFromDate() { return fromDate; }
+        public void setFromDate(LocalDate fromDate) { this.fromDate = fromDate; }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof SalariesId)) return false;
+            SalariesId that = (SalariesId) o;
+            return empNo == that.empNo && fromDate.equals(that.fromDate);
+        }
+
+        @Override
+        public int hashCode() { return Objects.hash(empNo, fromDate); }
+
+
     }
 }
