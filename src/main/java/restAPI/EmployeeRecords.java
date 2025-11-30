@@ -2,6 +2,7 @@ package restAPI;
 
 import EMF.EMF;
 import daos.DeptDAO;
+import daos.EmployeeDAO;
 import employeesdb.Departments;
 import employeesdb.Employees;
 import jakarta.persistence.EntityManager;
@@ -52,7 +53,14 @@ public class EmployeeRecords {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getEmployee(@PathParam("empNo") int empNo) {
         EntityManager em = EMF.getEntityManager();
-        Employees emp = em.find(Employees.class, empNo);
+        Employees emp;
+
+        try {
+            EmployeeDAO dao = new EmployeeDAO(em);
+            emp = dao.findEmployee(empNo);
+        } finally {
+            em.close();
+        }
 
         if (emp == null) {
             return Response.status(Response.Status.NOT_FOUND)
@@ -60,7 +68,16 @@ public class EmployeeRecords {
                     .build();
         }
 
-        return Response.ok(emp).build();
+        EmployeeDTO dto = new EmployeeDTO(
+                emp.getEmpNo(),
+                emp.getBirthDate().toString(),
+                emp.getFirstName(),
+                emp.getLastName(),
+                emp.getGender().toString(),
+                emp.getHireDate().toString()
+        );
+
+        return Response.ok(dto).build();
     }
 
 //    @GET
