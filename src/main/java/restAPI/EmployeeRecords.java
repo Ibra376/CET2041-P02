@@ -56,8 +56,7 @@ public class EmployeeRecords {
         Employees emp;
 
         try {
-            EmployeeDAO dao = new EmployeeDAO(em);
-            emp = dao.findEmployee(empNo);
+            emp = em.find(Employees.class, empNo);
         } finally {
             em.close();
         }
@@ -68,16 +67,7 @@ public class EmployeeRecords {
                     .build();
         }
 
-        EmployeeDTO dto = new EmployeeDTO(
-                emp.getEmpNo(),
-                emp.getBirthDate().toString(),
-                emp.getFirstName(),
-                emp.getLastName(),
-                emp.getGender().toString(),
-                emp.getHireDate().toString()
-        );
-
-        return Response.ok(dto).build();
+        return Response.ok().entity(emp).build();
     }
 
 //    @GET
