@@ -75,4 +75,14 @@ public class DeptDAO {
     public Departments findDept(String id) {
         return em.find(Departments.class, id);
     }
+
+    public List<Departments> getAllDepartments() {
+        try{
+            return em.createNamedQuery("Departments.findAll", Departments.class).getResultList();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

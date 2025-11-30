@@ -1,5 +1,8 @@
 package restAPI;
 
+import EMF.EMF;
+import daos.DeptDAO;
+import employeesdb.Departments;
 import employeesdb.Employees;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -13,21 +16,42 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import java.util.List;
+
 @Path("/records")
 public class EmployeeRecords {
 
-    @PersistenceContext
-    private EntityManager em;
+//    @PersistenceContext
+//    private EntityManager em;
+
+
 
     @GET
     @Path("/ping")
     public Response ping() { return Response.ok().entity("Service online").build(); }
+
+    @GET
+    @Path("/allDepartments")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response allDepartments() {
+        EntityManager em = EMF.getEntityManager();
+        DeptDAO deptDAO = new DeptDAO(em);
+        List<Departments> departmentsList;
+        try{
+            departmentsList = deptDAO.getAllDepartments();
+        } finally {
+            em.close();
+        }
+
+        return Response.ok().entity(departmentsList).build();
+    }
 
     // Endpoint 2: return full employee record
     @GET
     @Path("/{empNo}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getEmployee(@PathParam("empNo") int empNo) {
+        EntityManager em = EMF.getEntityManager();
         Employees emp = em.find(Employees.class, empNo);
 
         if (emp == null) {
@@ -39,24 +63,25 @@ public class EmployeeRecords {
         return Response.ok(emp).build();
     }
 
-    @GET
-    @Path ("/{id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getEmployee(@PathParam("id") String empNo) {
-        Employees emp = em.find(Employees.class, empNo);
-        if (emp == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("{\"error\":\"Department not found\"}")
-                    .build();
-        }
-        return Response.ok(emp).build();
-    }
+//    @GET
+//    @Path ("/{id}")
+//    @Produces(MediaType.APPLICATION_JSON)
+//    public Response getEmployee(@PathParam("id") String empNo) {
+//        Employees emp = em.find(Employees.class, empNo);
+//        if (emp == null) {
+//            return Response.status(Response.Status.NOT_FOUND)
+//                    .entity("{\"error\":\"Department not found\"}")
+//                    .build();
+//        }
+//        return Response.ok(emp).build();
+//    }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
     public Response createDepartment(Employees emp) {
+        EntityManager em = EMF.getEntityManager();
         em.persist(emp);
         return Response.status(Response.Status.CREATED).entity(emp).build();
     }

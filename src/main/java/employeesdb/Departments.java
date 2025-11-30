@@ -1,10 +1,12 @@
 package employeesdb;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
 @Table(name = "departments")
+@NamedQuery(name="Departments.findAll", query ="SELECT d FROM Departments d")
 public class Departments {
     @Id
     @Column(name = "dept_no", length = 4, columnDefinition = "CHAR(4)")
@@ -15,10 +17,13 @@ public class Departments {
 
     @OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade =
             CascadeType.ALL,  orphanRemoval = true)
+    @JsonIgnore // annotation so that Jackson will ignore this field when converting to JSON
+    //to fix the failed to lazily initialize error for endpoint 1
     private List<Dept_manager> dept_manager;
 
     @OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade =
             CascadeType.ALL,  orphanRemoval = true)
+    @JsonIgnore
     private List<Dept_emp> dept_emp;
 
     public Departments() {}
