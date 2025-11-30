@@ -85,4 +85,15 @@ public class DeptDAO {
             return null;
         }
     }
+
+    public List<Dept_emp> getDeptEmp(String id) {
+        try{
+            return em.createNamedQuery("DeptEmp.EmpByDept", Dept_emp.class)
+                    .setParameter("deptNo",id)
+                    .getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

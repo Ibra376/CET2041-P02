@@ -1,5 +1,6 @@
 package employeesdb;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -7,6 +8,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "dept_emp")
+@NamedQuery(name="DeptEmp.EmpByDept", query = "SELECT e FROM Dept_emp e WHERE e.department.deptNo = :deptNo")
 public class Dept_emp {
 
     @EmbeddedId
@@ -25,10 +27,12 @@ public class Dept_emp {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "emp_no", insertable = false, updatable = false)
+    @JsonIgnore
     private Employees employee;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dept_no", insertable = false, updatable = false)
+    @JsonIgnore
     private Departments department;
 
     public Dept_emp() {}

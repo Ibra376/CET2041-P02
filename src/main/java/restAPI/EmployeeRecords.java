@@ -4,6 +4,7 @@ import EMF.EMF;
 import daos.DeptDAO;
 import daos.EmployeeDAO;
 import employeesdb.Departments;
+import employeesdb.Dept_emp;
 import employeesdb.Employees;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -17,6 +18,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Path("/records")
@@ -70,6 +72,23 @@ public class EmployeeRecords {
         return Response.ok().entity(emp).build();
     }
 
+    @GET
+    @Path("/department/{deptNo}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getEmpByDept(@PathParam("deptNo") String deptNo) {
+        EntityManager em = EMF.getEntityManager();
+        DeptDAO deptDAO = new DeptDAO(em);
+        List<Dept_emp> deptEmp;
+        try{
+            deptEmp = deptDAO.getDeptEmp(deptNo);
+        }
+        finally {
+            em.close();
+        }
+
+        return Response.ok().entity(deptEmp).build();
+    }
+
 //    @GET
 //    @Path ("/{id}")
 //    @Produces(MediaType.APPLICATION_JSON)
@@ -90,6 +109,7 @@ public class EmployeeRecords {
     public Response createDepartment(Employees emp) {
         EntityManager em = EMF.getEntityManager();
         em.persist(emp);
+        em.close();
         return Response.status(Response.Status.CREATED).entity(emp).build();
     }
 
