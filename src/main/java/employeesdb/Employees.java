@@ -1,6 +1,7 @@
 package employeesdb;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -33,9 +34,11 @@ public class Employees {
     private LocalDate hireDate;
 
     @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("employee")
     private List<Salaries> salary;
 
     @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("employee")
     private List<Titles> title;
 
     public List<Salaries> getSalary() {
@@ -55,9 +58,11 @@ public class Employees {
     }
 
     @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("employee")
     private List<Dept_emp>  dept_emp;
 
     @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("employee")
     private List<Dept_manager>  dept_manager;
 
     public Employees() {}
@@ -86,6 +91,12 @@ public class Employees {
 
     public LocalDate getHireDate() {return hireDate;}
     public void setHireDate(LocalDate hireDate) {this.hireDate = hireDate;}
+
+    public List<Dept_emp> getDept_emp() { return dept_emp; }
+    public void setDept_emp(List<Dept_emp> dept_emp) { this.dept_emp = dept_emp; }
+
+    public List<Dept_manager> getDept_manager() { return dept_manager; }
+    public void setDept_manager(List<Dept_manager> dept_manager) { this.dept_manager = dept_manager; }
 
     @Override
     public String toString() {

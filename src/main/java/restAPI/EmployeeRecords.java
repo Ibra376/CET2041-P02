@@ -56,11 +56,18 @@ public class EmployeeRecords {
             emp = employeeDAO.findEmployee(empNo);
 
             if (emp != null) {
+                // Force initialization of lazy collections
                 if (emp.getSalary() != null) {
                     emp.getSalary().size();
                 }
                 if (emp.getTitles() != null) {
                     emp.getTitles().size();
+                }
+                if (emp.getDept_emp() != null) {
+                    emp.getDept_emp().size();
+                }
+                if (emp.getDept_manager() != null) {
+                    emp.getDept_manager().size();
                 }
             }
 
@@ -74,6 +81,7 @@ public class EmployeeRecords {
                     .build();
         }
 
+        // Just return the entity; Jackson will serialize salaries/titles/dept_emp/dept_manager
         return Response.ok().entity(emp).build();
     }
 

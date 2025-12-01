@@ -80,7 +80,8 @@ public class Titles {
             if (this == o) return true;
             if (!(o instanceof TitlesId)) return false;
             TitlesId that = (TitlesId) o;
-            return empNo == that.empNo &&  fromDate.equals(that.fromDate) && title == that.title;
+            return empNo == that.empNo &&  Objects.equals(fromDate,
+                    that.fromDate) && Objects.equals(title, that.title);
         }
 
         @Override

@@ -3,6 +3,7 @@ package employeesdb;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -24,7 +25,7 @@ public class Salaries {
 
     @ManyToOne
     @JoinColumn(name="emp_no", insertable=false, updatable=false )
-    @JsonIgnore
+    @JsonIgnoreProperties("salary")
     private Employees employee;
 
     public Salaries() {}
@@ -35,7 +36,6 @@ public class Salaries {
         this.toDate = toDate;
         this.employee = employee;
     }
-
 
     public int getSalary() { return salary; }
     public void setSalary(int salary) { this.salary = salary; }

@@ -1,5 +1,7 @@
 package employeesdb;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -10,25 +12,28 @@ import java.util.Objects;
 public class Dept_manager {
 
     @EmbeddedId
-    private DeptManagerId id;
     @AttributeOverrides({
             @AttributeOverride(name = "empNo", column = @Column(name = "emp_no")),
-            @AttributeOverride(name = "deptNo", column = @Column(name = "dept_no", length = 4, columnDefinition =
-                    "CHAR(4)"))
+            @AttributeOverride(name = "deptNo", column = @Column(name = "dept_no", length = 4, columnDefinition = "CHAR(4)"))
     })
+    private DeptManagerId id;
 
     @Column(name = "from_date")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate fromDate;
 
     @Column(name = "to_date")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate toDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "emp_no", insertable = false, updatable = false)
+    @JsonIgnore
     private Employees employee;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dept_no", insertable = false, updatable = false)
+    @JsonIgnore
     private Departments department;
 
     public Dept_manager() {}
@@ -42,9 +47,11 @@ public class Dept_manager {
     public DeptManagerId getId() { return id; }
     public void setId(DeptManagerId id) { this.id = id; }
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     public LocalDate getFromDate() { return fromDate; }
     public void setFromDate(LocalDate fromDate) { this.fromDate = fromDate; }
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     public LocalDate getToDate() { return toDate; }
     public void setToDate(LocalDate toDate) { this.toDate = toDate; }
 
