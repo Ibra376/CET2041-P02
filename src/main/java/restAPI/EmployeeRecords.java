@@ -7,7 +7,6 @@ import employeesdb.Departments;
 import employeesdb.Dept_emp;
 import employeesdb.Employees;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -17,17 +16,10 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
-import java.util.ArrayList;
 import java.util.List;
 
 @Path("/records")
 public class EmployeeRecords {
-
-//    @PersistenceContext
-//    private EntityManager em;
-
-
 
     @GET
     @Path("/ping")
@@ -58,7 +50,8 @@ public class EmployeeRecords {
         Employees emp;
 
         try {
-            emp = em.find(Employees.class, empNo);
+            EmployeeDAO employeeDAO = new EmployeeDAO(em);
+            emp = employeeDAO.findEmployee(empNo);
         } finally {
             em.close();
         }
@@ -88,19 +81,6 @@ public class EmployeeRecords {
 
         return Response.ok().entity(deptEmp).build();
     }
-
-//    @GET
-//    @Path ("/{id}")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public Response getEmployee(@PathParam("id") String empNo) {
-//        Employees emp = em.find(Employees.class, empNo);
-//        if (emp == null) {
-//            return Response.status(Response.Status.NOT_FOUND)
-//                    .entity("{\"error\":\"Department not found\"}")
-//                    .build();
-//        }
-//        return Response.ok(emp).build();
-//    }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
