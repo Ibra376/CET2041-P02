@@ -38,6 +38,22 @@ public class Employees {
     @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
     private List<Titles> title;
 
+    public List<Salaries> getSalary() {
+        return salary;
+    }
+
+    public void setSalary(List<Salaries> salary) {
+        this.salary = salary;
+    }
+
+    public List<Titles> getTitles() {
+        return title;
+    }
+
+    public void setTitles(List<Titles> title) {
+        this.title = title;
+    }
+
     @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
     private List<Dept_emp>  dept_emp;
 

@@ -16,6 +16,8 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
+import java.time.LocalDate;
 import java.util.List;
 
 @Path("/records")
@@ -52,6 +54,16 @@ public class EmployeeRecords {
         try {
             EmployeeDAO employeeDAO = new EmployeeDAO(em);
             emp = employeeDAO.findEmployee(empNo);
+
+            if (emp != null) {
+                if (emp.getSalary() != null) {
+                    emp.getSalary().size();
+                }
+                if (emp.getTitles() != null) {
+                    emp.getTitles().size();
+                }
+            }
+
         } finally {
             em.close();
         }
@@ -64,6 +76,39 @@ public class EmployeeRecords {
 
         return Response.ok().entity(emp).build();
     }
+
+//    public static class PromotionRequest {
+//        public int empNo;
+//        public String newTitle;
+//        public int newSalary;
+//        public String effectiveDate;
+//    }
+//    @POST
+//    @Path("/promote")
+//    @Consumes(MediaType.APPLICATION_JSON)
+//    @Produces(MediaType.APPLICATION_JSON)
+//    public Response promoteEmployee (PromotionRequest promotionReq) {
+//        EntityManager em = EMF.getEntityManager();
+//        em.getTransaction().begin();
+//        Employees emp =  em.find(Employees.class, promotionReq.empNo);
+//
+//        if (emp == null) {
+//            return Response.status(Response.Status.NOT_FOUND)
+//                    .entity("{\"error\":\"Employee not found\"}")
+//                    .build();
+//        }
+//
+//        LocalDate effectiveDate;
+//        try{
+//            effectiveDate = LocalDate.parse(promotionReq.effectiveDate);
+//        }catch(Exception e){
+//            return Response.status(Response.Status.BAD_REQUEST)
+//                    .entity("{\"error\":\"Invalid effectiveDate, expected yyyy-MM-dd\"}")
+//                    .build();
+//        }
+//
+//    }
+
 
     @GET
     @Path("/department/{deptNo}")

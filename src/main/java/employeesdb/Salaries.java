@@ -1,5 +1,8 @@
 package employeesdb;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -16,10 +19,12 @@ public class Salaries {
     private int salary;
 
     @Column(name = "to_date")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate toDate;
 
     @ManyToOne
     @JoinColumn(name="emp_no", insertable=false, updatable=false )
+    @JsonIgnore
     private Employees employee;
 
     public Salaries() {}
@@ -37,6 +42,10 @@ public class Salaries {
 
     public LocalDate getToDate() { return toDate; }
     public void setToDate(LocalDate toDate) { this.toDate = toDate; }
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    public LocalDate getFromDate() { return salariesId.getFromDate(); }
+    public void setFromDate(LocalDate fromDate) { this.salariesId.setFromDate(fromDate);}
 
     public Employees getEmployee() { return employee;}
     public void setEmployee(Employees employee) { this.employee = employee;}
@@ -65,6 +74,8 @@ public class Salaries {
         public int getEmpNo() { return empNo; }
         public void setEmpNo(int empNo) { this.empNo = empNo; }
 
+        @JsonGetter("fromDate")
+        @JsonFormat(pattern = "yyyy-MM-dd")
         public LocalDate getFromDate() { return fromDate; }
         public void setFromDate(LocalDate fromDate) { this.fromDate = fromDate; }
 
