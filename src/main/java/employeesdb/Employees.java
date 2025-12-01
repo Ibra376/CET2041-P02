@@ -1,5 +1,6 @@
 package employeesdb;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -13,6 +14,7 @@ public class Employees {
     @Column(name ="emp_no")
     int empNo;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @Column(name = "birth_date")
     private LocalDate birthDate;
 
@@ -27,6 +29,7 @@ public class Employees {
     private Gender gender;
 
     @Column(name= "hire_date")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate hireDate;
 
     @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
