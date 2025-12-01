@@ -1,5 +1,7 @@
 package employeesdb;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -13,6 +15,7 @@ public class Employees {
     @Column(name ="emp_no")
     int empNo;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @Column(name = "birth_date")
     private LocalDate birthDate;
 
@@ -27,18 +30,39 @@ public class Employees {
     private Gender gender;
 
     @Column(name= "hire_date")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate hireDate;
 
     @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("employee")
     private List<Salaries> salary;
 
     @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("employee")
     private List<Titles> title;
 
+    public List<Salaries> getSalary() {
+        return salary;
+    }
+
+    public void setSalary(List<Salaries> salary) {
+        this.salary = salary;
+    }
+
+    public List<Titles> getTitles() {
+        return title;
+    }
+
+    public void setTitles(List<Titles> title) {
+        this.title = title;
+    }
+
     @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("employee")
     private List<Dept_emp>  dept_emp;
 
     @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("employee")
     private List<Dept_manager>  dept_manager;
 
     public Employees() {}
@@ -67,6 +91,12 @@ public class Employees {
 
     public LocalDate getHireDate() {return hireDate;}
     public void setHireDate(LocalDate hireDate) {this.hireDate = hireDate;}
+
+    public List<Dept_emp> getDept_emp() { return dept_emp; }
+    public void setDept_emp(List<Dept_emp> dept_emp) { this.dept_emp = dept_emp; }
+
+    public List<Dept_manager> getDept_manager() { return dept_manager; }
+    public void setDept_manager(List<Dept_manager> dept_manager) { this.dept_manager = dept_manager; }
 
     @Override
     public String toString() {

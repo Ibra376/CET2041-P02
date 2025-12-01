@@ -1,5 +1,7 @@
 package employeesdb;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -13,10 +15,12 @@ public class Titles {
     private  TitlesId titlesId;
 
     @Column(name = "to_date")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate toDate;
 
     @ManyToOne
     @JoinColumn(name="emp_no",  insertable=false, updatable=false )
+    @JsonIgnore
     private Employees employee;
 
     public Titles() {}
@@ -32,6 +36,15 @@ public class Titles {
 
     public Employees getEmployee() {return employee;}
     public void setEmployee(Employees employee) {this.employee = employee;}
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    public LocalDate getFromDate() {
+        return titlesId.getFromDate();
+    }
+
+    public String getTitle() {
+        return titlesId.getTitle();
+    }
 
     @Embeddable
     public static class TitlesId implements Serializable
@@ -67,7 +80,8 @@ public class Titles {
             if (this == o) return true;
             if (!(o instanceof TitlesId)) return false;
             TitlesId that = (TitlesId) o;
-            return empNo == that.empNo &&  fromDate.equals(that.fromDate) && title == that.title;
+            return empNo == that.empNo &&  Objects.equals(fromDate,
+                    that.fromDate) && Objects.equals(title, that.title);
         }
 
         @Override
