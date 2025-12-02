@@ -1,5 +1,6 @@
 package daos;
 
+import DTO.DeptEmpDTO;
 import employeesdb.Dept_emp;
 import jakarta.persistence.EntityManager;
 

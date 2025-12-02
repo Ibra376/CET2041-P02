@@ -1,4 +1,4 @@
-package daos;
+package DTO;
 
 import java.time.LocalDate;
 

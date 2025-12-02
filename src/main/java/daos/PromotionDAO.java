@@ -23,7 +23,7 @@ public class PromotionDAO {
                                 String deptNo,
                                 String newTitle,
                                 int newSalary,
-                                LocalDate startDate) {
+                                boolean isManager) {
         try {
             em.getTransaction().begin();
 
