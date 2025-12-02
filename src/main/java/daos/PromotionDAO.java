@@ -6,10 +6,11 @@ import employeesdb.Dept_emp;
 import employeesdb.Salaries;
 import employeesdb.Titles;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Objects;
 
 public class PromotionDAO {
 
@@ -41,71 +42,10 @@ public class PromotionDAO {
 
             LocalDate today = LocalDate.now();
             LocalDate maxDate = LocalDate.of(9999, 1, 1);
-            LocalDate newEndDate = today.minusDays(1);
 
-            TypedQuery<Titles> titleQuery = em.createQuery(
-                    "SELECT t FROM Titles t " +
-                            "WHERE t.titlesId.empNo = :empNo " +
-                            "AND t.toDate = :maxDate",
-                    Titles.class
-            );
-            titleQuery.setParameter("empNo", empNo);
-            titleQuery.setParameter("maxDate", maxDate);
-            List<Titles> currentTitles = titleQuery.getResultList();
-
-            for (Titles t : currentTitles) {
-                t.setToDate(newEndDate);
-            }
-
-            TypedQuery<Salaries> salaryQuery = em.createQuery(
-                    "SELECT s FROM Salaries s " +
-                            "WHERE s.salariesId.empNo = :empNo " +
-                            "AND s.toDate = :maxDate",
-                    Salaries.class
-            );
-            salaryQuery.setParameter("empNo", empNo);
-            salaryQuery.setParameter("maxDate", maxDate);
-            List<Salaries> salaries = salaryQuery.getResultList();
-
-            for (Salaries sal : salaries) {
-                sal.setToDate(newEndDate);
-            }
-
-            TypedQuery<Dept_emp> deptEmpQuery = em.createQuery(
-                    "SELECT de FROM Dept_emp de " +
-                            "WHERE de.id.empNo = :empNo " +
-                            "AND de.toDate = :maxDate",
-                    Dept_emp.class
-            );
-            deptEmpQuery.setParameter("empNo", empNo);
-            deptEmpQuery.setParameter("maxDate", maxDate);
-            List<Dept_emp> currentDeptEmps = deptEmpQuery.getResultList();
-
-            for (Dept_emp de : currentDeptEmps) {
-                de.setToDate(newEndDate);
-            }
-
-            Titles.TitlesId titlesId =
-                    new Titles.TitlesId(empNo, newTitle, today);
-            Titles newTitleEntity =
-                    new Titles(titlesId, maxDate, emp);
-            em.persist(newTitleEntity);
-
-            Salaries.SalariesId salariesId =
-                    new Salaries.SalariesId(empNo, today);
-            Salaries newSalaryEntity =
-                    new Salaries(salariesId, newSalary, maxDate, emp);
-            em.persist(newSalaryEntity);
-
-            Dept_emp.DeptEmpId deptEmpId =
-                    new Dept_emp.DeptEmpId(empNo, deptNo);
-
-            Dept_emp newDeptEmp =
-                    new Dept_emp(deptEmpId, today, maxDate);
-            newDeptEmp.setEmployee(emp);
-            newDeptEmp.setDepartment(dept);
-
-            em.persist(newDeptEmp);
+            updateTitle(empNo, emp, today, maxDate, newTitle);
+            updateSalary(empNo, emp, today, maxDate, newSalary);
+            updateDeptEmp(empNo, emp, deptNo, dept, today,maxDate);
 
             em.getTransaction().commit();
 
@@ -115,5 +55,95 @@ public class PromotionDAO {
             }
             throw e;
         }
+
     }
+
+    private void updateSalary(int empNo, Employees emp, LocalDate fromDate, LocalDate toDate, int newSalary){
+        Salaries salaries ;
+        try{
+            salaries = em.createNamedQuery("salaries.findCurrent", Salaries.class)
+                    .setParameter("empNo", empNo)
+                    .setParameter("maxDate", toDate)
+                    .getSingleResult();
+
+            if(salaries.getSalary() == newSalary){
+                return; // no change needed
+            }
+            salaries.setToDate(fromDate);
+        }
+        catch(NoResultException e){
+            throw new IllegalStateException("Error: no current salary found for employee", e);
+        }
+        catch(NonUniqueResultException e){
+            throw new IllegalStateException("Error: more than 1 row of current salary detected", e);
+        }
+
+        Salaries.SalariesId salariesId =
+                new Salaries.SalariesId(empNo, fromDate);
+        Salaries newSalaryEntity =
+                new Salaries(salariesId, newSalary, toDate, emp);
+
+        em.persist(newSalaryEntity);
+    }
+
+    private void updateTitle(int empNo, Employees emp, LocalDate fromDate, LocalDate toDate, String newTitle){
+        Titles titles;
+        try{
+            titles = em.createNamedQuery("titles.findCurrent",  Titles.class)
+                    .setParameter("empNo", empNo)
+                    .setParameter("maxDate", toDate)
+                    .getSingleResult();
+
+            if(Objects.equals(titles.getTitle(), newTitle)){
+                return; // no change needed
+            }
+            titles.setToDate(fromDate);
+        }
+        catch(NoResultException e){
+            throw new IllegalStateException("Error: no current title found for employee", e);
+        }
+        catch(NonUniqueResultException e){
+            throw new IllegalStateException("Error: more than 1 row of current title detected", e);
+        }
+
+        Titles.TitlesId titlesId =
+                new Titles.TitlesId(empNo, newTitle, fromDate);
+        Titles newTitleEntity =
+                new Titles(titlesId, toDate, emp);
+        em.persist(newTitleEntity);
+    }
+
+    private void updateDeptEmp(int empNo, Employees emp, String deptNo, Departments dept, LocalDate fromDate,
+                               LocalDate toDate){
+        Dept_emp deptEmp;
+        try{
+            deptEmp = em.createNamedQuery("DeptEmp.findCurrent",  Dept_emp.class)
+                    .setParameter("empNo", empNo)
+                    .setParameter("maxDate", toDate)
+                    .getSingleResult();
+
+            if(Objects.equals(deptEmp.getId().getDeptNo(), deptNo)){
+                return; // no change needed
+            }
+            deptEmp.setToDate(fromDate);
+        }
+        catch(NoResultException e){
+            throw new IllegalStateException("Error: no current DeptEmp record found for employee", e);
+        }
+        catch(NonUniqueResultException e){
+            throw new IllegalStateException("Error: more than 1 row of current DeptEmp records detected", e);
+        }
+
+        Dept_emp.DeptEmpId deptEmpId =
+                new Dept_emp.DeptEmpId(empNo, deptNo);
+
+        Dept_emp newDeptEmp =
+                new Dept_emp(deptEmpId, fromDate, toDate);
+        newDeptEmp.setEmployee(emp);
+        newDeptEmp.setDepartment(dept);
+
+        em.persist(newDeptEmp);
+    }
+
+
 }

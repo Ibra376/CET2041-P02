@@ -10,6 +10,8 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "titles")
+@NamedQuery(name = "titles.findCurrent", query = "SELECT t FROM Titles t " +
+        "WHERE t.titlesId.empNo = :empNo AND t.toDate = :maxDate")
 public class Titles {
     @EmbeddedId
     private  TitlesId titlesId;

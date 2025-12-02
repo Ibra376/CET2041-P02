@@ -33,6 +33,7 @@ public class DeptEmpDAO {
         }
     }
 
+    //to check, can be deleted
     public List<DeptEmpDTO> getDeptEmp2(String deptNo, int pageNum) {
         //if pageNum <=0 set to default 1
         if(pageNum<1){

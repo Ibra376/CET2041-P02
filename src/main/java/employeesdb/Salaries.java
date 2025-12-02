@@ -12,6 +12,9 @@ import java.util.Objects;
 
 @Entity
 @Table(name="salaries")
+@NamedQuery(name="salaries.findCurrent", query = "SELECT s FROM Salaries s " +
+        "WHERE s.salariesId.empNo = :empNo " +
+        "AND s.toDate = :maxDate")
 public class Salaries {
     @EmbeddedId
     private SalariesId salariesId;

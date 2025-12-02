@@ -9,7 +9,12 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "dept_emp")
-@NamedQuery(name="DeptEmp.EmpByDept", query = "SELECT e FROM Dept_emp e WHERE e.department.deptNo = :deptNo")
+@NamedQueries({
+        @NamedQuery(name="DeptEmp.EmpByDept", query = "SELECT e FROM Dept_emp e WHERE e.department.deptNo = :deptNo"),
+        @NamedQuery(name = "DeptEmp.findCurrent", query = "SELECT de from Dept_emp de WHERE de.id.empNo = :empNo " +
+                "AND de.toDate = :maxDate")
+})
+
 public class Dept_emp {
 
     @EmbeddedId

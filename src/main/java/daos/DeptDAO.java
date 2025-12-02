@@ -4,6 +4,8 @@ import employeesdb.Departments;
 import employeesdb.Dept_emp;
 import employeesdb.Dept_manager;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DeptDAO {
@@ -80,20 +82,11 @@ public class DeptDAO {
         try{
             return em.createNamedQuery("Departments.findAll", Departments.class).getResultList();
         }
-        catch (Exception e){
+        //catch any JPA related exception
+        catch (PersistenceException e){
             e.printStackTrace();
-            return null;
+            return new ArrayList<>();
         }
     }
 
-    public List<Dept_emp> getDeptEmp(String id) {
-        try{
-            return em.createNamedQuery("DeptEmp.EmpByDept", Dept_emp.class)
-                    .setParameter("deptNo",id)
-                    .getResultList();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 }
