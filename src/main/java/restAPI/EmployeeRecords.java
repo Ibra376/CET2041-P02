@@ -1,15 +1,12 @@
 package restAPI;
 
+import DTO.DeptEmpDTO;
+import DTO.PromotionDTO;
 import EMF.EMF;
-import daos.DeptDAO;
-import daos.DeptEmpDAO;
-import daos.DeptEmpDTO;
-import daos.EmployeeDAO;
+import daos.*;
 import employeesdb.Departments;
-import employeesdb.Dept_emp;
 import employeesdb.Employees;
 import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -73,7 +70,8 @@ public class EmployeeRecords {
 
         if (emp == null) {
             return Response.status(Response.Status.NOT_FOUND)
-                    .entity("{\"error\":\"Employee not found\"}")
+                    .entity("ERROR: Employee " +empNo+" not " +
+                            "found")
                     .build();
         }
         return Response.ok().entity(emp).build();
@@ -145,17 +143,63 @@ public class EmployeeRecords {
         return Response.ok().entity(deptEmpDTO).build();
     }
 
-
-
+    // Endpoint 4: Promotions
     @POST
+    @Path("/promote")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Transactional
-    public Response createDepartment(Employees emp) {
-        EntityManager em = EMF.getEntityManager();
-        em.persist(emp);
-        em.close();
-        return Response.status(Response.Status.CREATED).entity(emp).build();
-    }
+    public Response promoteEmployee(PromotionDTO promote) {
 
+        if (promote == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Error: Promotion details are required.")
+                    .build();
+        }
+
+        if (promote.getEmpNo() <= 0 ||
+                promote.getDeptNo() == null || promote.getDeptNo().trim().isEmpty() ||
+                promote.getNewTitle() == null || promote.getNewTitle().trim().isEmpty()) {
+
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Error: empNo, deptNo, and newTitle are required.")
+                    .build();
+        }
+
+        if (promote.getNewSalary() <= 0) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Error: newSalary must be a positive integer.")
+                    .build();
+        }
+
+        EntityManager em = EMF.getEntityManager();
+
+        try {
+            PromotionDAO promoDAO = new PromotionDAO(em);
+
+            promoDAO.promoteEmployee(
+                    promote.getEmpNo(),
+                    promote.getDeptNo(),
+                    promote.getNewTitle(),
+                    promote.getNewSalary(),
+                    promote.isManager()
+            );
+
+            return Response.status(Response.Status.CREATED)
+                    .entity(promote)
+                    .build();
+
+        } catch (RuntimeException ex) {
+
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Error: " + ex.getMessage())
+                    .build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.serverError()
+                    .entity("{\"error\":\"Failed to process promotion\"}")
+                    .build();
+        } finally {
+            em.close();
+        }
+    }
 }
