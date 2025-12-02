@@ -5,7 +5,6 @@ public class PromotionDTO {
     private String deptNo;
     private String newTitle;
     private int newSalary;
-    private boolean isManager;
 
     public PromotionDTO(){}
 
@@ -32,11 +31,5 @@ public class PromotionDTO {
     }
     public void setNewSalary(int newSalary) {
         this.newSalary = newSalary;
-    }
-    public boolean isManager() {
-        return isManager;
-    }
-    public void setManager(boolean isManager) {
-        this.isManager = isManager;
     }
 }
