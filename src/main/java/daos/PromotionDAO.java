@@ -19,11 +19,13 @@ public class PromotionDAO {
         this.em = em;
     }
 
-    public void promoteEmployee(int empNo,
-                                String deptNo,
-                                String newTitle,
-                                int newSalary,
-                                boolean isManager) {
+    public void promoteEmployee(
+            int empNo,
+            String deptNo,
+            String newTitle,
+            int newSalary,
+            boolean isManager) {
+
         try {
             em.getTransaction().begin();
 
@@ -37,8 +39,9 @@ public class PromotionDAO {
                 throw new RuntimeException("Department not found: " + deptNo);
             }
 
+            LocalDate today = LocalDate.now();
             LocalDate maxDate = LocalDate.of(9999, 1, 1);
-            LocalDate newEndDate = startDate.minusDays(1);
+            LocalDate newEndDate = today.minusDays(1);
 
             TypedQuery<Titles> titleQuery = em.createQuery(
                     "SELECT t FROM Titles t " +
@@ -83,26 +86,29 @@ public class PromotionDAO {
             }
 
             Titles.TitlesId titlesId =
-                    new Titles.TitlesId(empNo, newTitle, startDate);
+                    new Titles.TitlesId(empNo, newTitle, today);
             Titles newTitleEntity =
                     new Titles(titlesId, maxDate, emp);
             em.persist(newTitleEntity);
 
             Salaries.SalariesId salariesId =
-                    new Salaries.SalariesId(empNo, startDate);
+                    new Salaries.SalariesId(empNo, today);
             Salaries newSalaryEntity =
                     new Salaries(salariesId, newSalary, maxDate, emp);
             em.persist(newSalaryEntity);
 
             Dept_emp.DeptEmpId deptEmpId =
                     new Dept_emp.DeptEmpId(empNo, deptNo);
+
             Dept_emp newDeptEmp =
-                    new Dept_emp(deptEmpId, startDate, maxDate);
+                    new Dept_emp(deptEmpId, today, maxDate);
             newDeptEmp.setEmployee(emp);
             newDeptEmp.setDepartment(dept);
+
             em.persist(newDeptEmp);
 
             em.getTransaction().commit();
+
         } catch (Exception e) {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
