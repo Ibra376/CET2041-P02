@@ -12,7 +12,10 @@ import java.util.Objects;
 @NamedQueries({
         @NamedQuery(name="DeptEmp.EmpByDept", query = "SELECT e FROM Dept_emp e WHERE e.department.deptNo = :deptNo"),
         @NamedQuery(name = "DeptEmp.findCurrent", query = "SELECT de from Dept_emp de WHERE de.id.empNo = :empNo " +
-                "AND de.toDate = :maxDate")
+                "AND de.toDate = :maxDate"),
+        @NamedQuery(name = "DeptEmp.findPastRecord", query = "SELECT COUNT(de) from Dept_emp de WHERE de.id.empNo = " +
+                ":empNo " +
+                "AND de.id.deptNo = :deptNo")
 })
 
 public class Dept_emp {

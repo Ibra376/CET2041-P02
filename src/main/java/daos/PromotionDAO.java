@@ -134,6 +134,14 @@ public class PromotionDAO {
             throw new IllegalStateException("Error: more than 1 row of current DeptEmp records detected", e);
         }
 
+        boolean IsPastDept = ( em.createNamedQuery("DeptEmp.findPastRecord", Long.class)
+                .setParameter("empNo", empNo)
+                .setParameter("deptNo", deptNo)
+                .getSingleResult() ) > 0;
+
+        if(IsPastDept){
+            throw new IllegalStateException("Error: Employee cannot move back to a past department");
+        }
         Dept_emp.DeptEmpId deptEmpId =
                 new Dept_emp.DeptEmpId(empNo, deptNo);
 
@@ -144,6 +152,5 @@ public class PromotionDAO {
 
         em.persist(newDeptEmp);
     }
-
 
 }
