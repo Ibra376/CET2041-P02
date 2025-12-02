@@ -53,7 +53,6 @@ public class EmployeeRecords {
             emp = employeeDAO.findEmployee(empNo);
 
             if (emp != null) {
-                // Force initialization of lazy collections
                 if (emp.getSalary() != null) {
                     emp.getSalary().size();
                 }
@@ -77,42 +76,8 @@ public class EmployeeRecords {
                     .entity("{\"error\":\"Employee not found\"}")
                     .build();
         }
-
-        // Just return the entity; Jackson will serialize salaries/titles/dept_emp/dept_manager
         return Response.ok().entity(emp).build();
     }
-
-//    public static class PromotionRequest {
-//        public int empNo;
-//        public String newTitle;
-//        public int newSalary;
-//        public String effectiveDate;
-//    }
-//    @POST
-//    @Path("/promote")
-//    @Consumes(MediaType.APPLICATION_JSON)
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public Response promoteEmployee (PromotionRequest promotionReq) {
-//        EntityManager em = EMF.getEntityManager();
-//        em.getTransaction().begin();
-//        Employees emp =  em.find(Employees.class, promotionReq.empNo);
-//
-//        if (emp == null) {
-//            return Response.status(Response.Status.NOT_FOUND)
-//                    .entity("{\"error\":\"Employee not found\"}")
-//                    .build();
-//        }
-//
-//        LocalDate effectiveDate;
-//        try{
-//            effectiveDate = LocalDate.parse(promotionReq.effectiveDate);
-//        }catch(Exception e){
-//            return Response.status(Response.Status.BAD_REQUEST)
-//                    .entity("{\"error\":\"Invalid effectiveDate, expected yyyy-MM-dd\"}")
-//                    .build();
-//        }
-//
-//    }
 
     //endpoint 3
 
