@@ -11,7 +11,6 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Path("/records")
@@ -19,7 +18,9 @@ public class EmployeeRecords {
 
     @GET
     @Path("/ping")
-    public Response ping() { return Response.ok().entity("Service online").build(); }
+    public Response ping() {
+        return Response.ok().entity("Service online").build();
+    }
 
     @GET
     @Path("/allDepartments")
@@ -28,7 +29,7 @@ public class EmployeeRecords {
         EntityManager em = EMF.getEntityManager();
         DeptDAO deptDAO = new DeptDAO(em);
         List<Departments> departmentsList;
-        try{
+        try {
             departmentsList = deptDAO.getAllDepartments();
         } finally {
             em.close();
@@ -70,8 +71,7 @@ public class EmployeeRecords {
 
         if (emp == null) {
             return Response.status(Response.Status.NOT_FOUND)
-                    .entity("ERROR: Employee " +empNo+" not " +
-                            "found")
+                    .entity("ERROR: Employee " + empNo + " not found")
                     .build();
         }
         return Response.ok().entity(emp).build();
@@ -176,12 +176,12 @@ public class EmployeeRecords {
         try {
             PromotionDAO promoDAO = new PromotionDAO(em);
 
+            // isManager is derived inside PromotionDAO from newTitle
             promoDAO.promoteEmployee(
                     promote.getEmpNo(),
                     promote.getDeptNo(),
                     promote.getNewTitle(),
-                    promote.getNewSalary(),
-                    promote.isManager()
+                    promote.getNewSalary()
             );
 
             return Response.status(Response.Status.CREATED)

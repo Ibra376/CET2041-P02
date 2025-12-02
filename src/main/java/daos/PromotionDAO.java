@@ -3,6 +3,7 @@ package daos;
 import employeesdb.Employees;
 import employeesdb.Departments;
 import employeesdb.Dept_emp;
+import employeesdb.Dept_manager;
 import employeesdb.Salaries;
 import employeesdb.Titles;
 import jakarta.persistence.EntityManager;
@@ -10,6 +11,7 @@ import jakarta.persistence.NoResultException;
 import jakarta.persistence.NonUniqueResultException;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 
 public class PromotionDAO {
@@ -24,8 +26,7 @@ public class PromotionDAO {
             int empNo,
             String deptNo,
             String newTitle,
-            int newSalary,
-            boolean isManager) {
+            int newSalary) {
 
         try {
             em.getTransaction().begin();
@@ -47,6 +48,13 @@ public class PromotionDAO {
             updateSalary(empNo, emp, today, maxDate, newSalary);
             updateDeptEmp(empNo, emp, deptNo, dept, today,maxDate);
 
+            boolean isManager = newTitle != null &&
+                    newTitle.toLowerCase().contains("manager");
+
+            if (isManager) {
+                updateDeptManager(empNo, emp, deptNo, dept, today, maxDate);
+            }
+
             em.getTransaction().commit();
 
         } catch (Exception e) {
@@ -55,7 +63,6 @@ public class PromotionDAO {
             }
             throw e;
         }
-
     }
 
     private void updateSalary(int empNo, Employees emp, LocalDate fromDate, LocalDate toDate, int newSalary){
@@ -153,4 +160,49 @@ public class PromotionDAO {
         em.persist(newDeptEmp);
     }
 
+    private void updateDeptManager(int empNo,
+                                   Employees emp,
+                                   String deptNo,
+                                   Departments dept,
+                                   LocalDate fromDate,
+                                   LocalDate toDate) {
+
+        Dept_manager currentManager = null;
+
+        try {
+            // Get the current active manager for this department (if any)
+            currentManager = em.createQuery(
+                            "SELECT dm FROM Dept_manager dm " +
+                                    "WHERE dm.department.deptNo = :deptNo " +
+                                    "AND dm.toDate = :maxDate",
+                            Dept_manager.class
+                    )
+                    .setParameter("deptNo", deptNo)
+                    .setParameter("maxDate", toDate)
+                    .getSingleResult();
+
+            // If the same employee is already the manager of this dept, do nothing
+            if (currentManager.getId().getEmpNo() == empNo) {
+                return;
+            }
+
+            // Close current manager row
+            currentManager.setToDate(fromDate);
+
+        } catch (NoResultException e) {
+            // No current manager for this dept → that's fine, first manager
+        } catch (NonUniqueResultException e) {
+            throw new IllegalStateException("Error: more than 1 active DeptManager record detected for dept " + deptNo, e);
+        }
+        // Insert new dept_manager row
+        Dept_manager.DeptManagerId dmId =
+                new Dept_manager.DeptManagerId(empNo, deptNo);
+
+        Dept_manager newDeptManager =
+                new Dept_manager(dmId, fromDate, toDate);
+        newDeptManager.setEmployee(emp);
+        newDeptManager.setDepartment(dept);
+
+        em.persist(newDeptManager);
+    }
 }
