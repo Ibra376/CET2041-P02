@@ -89,6 +89,7 @@ public class Employees {
     public Gender getGender() {return gender;}
     public void setGender(Gender gender) {this.gender = gender;}
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     public LocalDate getHireDate() {return hireDate;}
     public void setHireDate(LocalDate hireDate) {this.hireDate = hireDate;}
 

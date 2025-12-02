@@ -9,6 +9,12 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "dept_manager")
+@NamedQueries({
+        @NamedQuery(name="DeptManager.IsPastManagerDept", query = "SELECT COUNT(dm) FROM Dept_manager dm WHERE dm.id" +
+                ".empNo = :empNo AND dm.id.deptNo = :deptNo"),
+
+})
+
 public class Dept_manager {
 
     @EmbeddedId
