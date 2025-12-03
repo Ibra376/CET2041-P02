@@ -1,3 +1,5 @@
 package employeesdb;
-
-public enum Gender {M,F};
+/**
+ * Enumeration representing the gender of an employee.
+ */
+public enum Gender {M,F}
