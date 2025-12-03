@@ -37,8 +37,8 @@ public class EMF {
      *
      * @return a fresh {@link EntityManager} for database interaction
      */
-    public static EntityManager getEntityManager() {
-        return emf.createEntityManager();
+    public static EntityManagerFactory getEntityManagerFactory() {
+        return emf;
     }
 
     /**

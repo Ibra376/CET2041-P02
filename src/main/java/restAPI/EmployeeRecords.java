@@ -7,6 +7,7 @@ import daos.*;
 import employeesdb.Departments;
 import employeesdb.Employees;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -40,7 +41,8 @@ public class EmployeeRecords {
     @Path("/allDepartments")
     @Produces(MediaType.APPLICATION_JSON)
     public Response allDepartments() {
-        EntityManager em = EMF.getEntityManager();
+        EntityManagerFactory emf = EMF.getEntityManagerFactory();
+        EntityManager em = emf.createEntityManager();
         DeptDAO deptDAO = new DeptDAO(em);
         List<Departments> departmentsList;
         try {
@@ -63,7 +65,8 @@ public class EmployeeRecords {
     @Path("/{empNo}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getEmployee(@PathParam("empNo") int empNo) {
-        EntityManager em = EMF.getEntityManager();
+        EntityManagerFactory emf = EMF.getEntityManagerFactory();
+        EntityManager em = emf.createEntityManager();
 
         Employees emp;
         try {
@@ -125,7 +128,9 @@ public class EmployeeRecords {
                     .entity("ERROR: pageNum must be positive integer > 0.").build();
         }
 
-        EntityManager em = EMF.getEntityManager();
+        EntityManagerFactory emf = EMF.getEntityManagerFactory();
+        EntityManager em = emf.createEntityManager();
+
         DeptEmpDAO deptEmpDAO = new DeptEmpDAO(em);
         List<DeptEmpDTO> deptEmpDTO;
 
@@ -188,7 +193,8 @@ public class EmployeeRecords {
                     .build();
         }
 
-        EntityManager em = EMF.getEntityManager();
+        EntityManagerFactory emf = EMF.getEntityManagerFactory();
+        EntityManager em = emf.createEntityManager();
 
         try {
             PromotionDAO promoDAO = new PromotionDAO(em);
@@ -202,7 +208,7 @@ public class EmployeeRecords {
             );
 
             return Response.status(Response.Status.CREATED)
-                    .entity(promote)
+                    .entity("promote")
                     .build();
 
         } catch (RuntimeException ex) {
