@@ -208,8 +208,8 @@ public class EmployeeRecords {
             );
 
             return Response.status(Response.Status.CREATED)
-                    .entity("promote")
-                    .build();
+                    .entity("Employee with empNo: "+ promote.getEmpNo() + "is successfully promoted." ).build();
+
 
         } catch (RuntimeException ex) {
 
