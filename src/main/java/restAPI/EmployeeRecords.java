@@ -86,6 +86,9 @@ public class EmployeeRecords {
 
     /**
      * GET endpoint to retrieve all employees for a given department and optional page number
+     * Query parameters for this endpoint:
+     * <li>deptNo (required)</li>
+     * <li>pageNum (optional, default value =1)</li>
      *
      * @param deptNo Department Number (required)
      * @param pageNumStr Optional page number as a string. Defaults to "1" if not provided or empty. Must be positive
@@ -125,7 +128,7 @@ public class EmployeeRecords {
         //pageNum <=0
         if(pageNum<1) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("ERROR: pageNum must be positive integer > 0.").build();
+                    .entity("ERROR: pageNum cannot be zero or negative.").build();
         }
 
         EntityManagerFactory emf = EMF.getEntityManagerFactory();
@@ -144,7 +147,7 @@ public class EmployeeRecords {
         //error message if output is empty
         if(deptEmpDTO.isEmpty()) {
             return Response.status(Response.Status.NOT_FOUND)
-                    .entity("ERROR: Department \""+deptNo+"\" not found").build();
+                    .entity("ERROR: There is no employee records found for department: "+deptNo+" on page "+pageNum).build();
         }
 
         return Response.ok().entity(deptEmpDTO).build();
