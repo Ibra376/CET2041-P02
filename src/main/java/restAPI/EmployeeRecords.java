@@ -44,27 +44,11 @@ public class EmployeeRecords {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getEmployee(@PathParam("empNo") int empNo) {
         EntityManager em = EMF.getEntityManager();
-        Employees emp;
 
+        Employees emp;
         try {
             EmployeeDAO employeeDAO = new EmployeeDAO(em);
             emp = employeeDAO.findEmployee(empNo);
-
-            if (emp != null) {
-                if (emp.getSalary() != null) {
-                    emp.getSalary().size();
-                }
-                if (emp.getTitles() != null) {
-                    emp.getTitles().size();
-                }
-                if (emp.getDept_emp() != null) {
-                    emp.getDept_emp().size();
-                }
-                if (emp.getDept_manager() != null) {
-                    emp.getDept_manager().size();
-                }
-            }
-
         } finally {
             em.close();
         }

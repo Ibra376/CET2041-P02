@@ -1,8 +1,6 @@
 package daos;
 
 import employeesdb.Departments;
-import employeesdb.Dept_emp;
-import employeesdb.Dept_manager;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import java.util.ArrayList;

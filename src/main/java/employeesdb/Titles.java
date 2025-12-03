@@ -92,6 +92,7 @@ public class Titles {
         }
 
         @Override
-        public int hashCode() { return Objects.hash (empNo, fromDate, title);}
+        public int hashCode() { return Objects.hash (getEmpNo(),
+                getFromDate(), getTitle());}
     }
 }
