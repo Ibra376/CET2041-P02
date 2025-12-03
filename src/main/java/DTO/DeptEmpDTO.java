@@ -34,7 +34,7 @@ public class DeptEmpDTO {
 
     @Override
     public String toString() {
-        return "DeptEmpDTO{empNo=" + empNo + ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' + ", hireDate=" + hireDate + '}';
+        return "DeptEmpDTO{empNo=" + getEmpNo() + ", firstName='" + getFirstName() + '\'' +
+                ", lastName='" + getLastName() + '\'' + ", hireDate=" + getHireDate() + '}';
     }
 }
