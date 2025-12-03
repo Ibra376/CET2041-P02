@@ -13,15 +13,41 @@ import jakarta.ws.rs.core.Response;
 
 import java.util.List;
 
+/**
+ * REST API resource class that exposes endpoints for managing and retrieving employee records.
+ * <p>
+ * Provides functionality to:
+ * <ul>
+ *     <li>Ping the service to check availability</li>
+ *     <li>Retrieve all departments</li>
+ *     <li>Retrieve a full employee record by employee number</li>
+ *     <li>Retrieve employees by department with pagination</li>
+ *     <li>Promote an employee with updated title and salary</li>
+ * </ul>
+ *
+ * Base path: {@code /records}
+
+ */
 @Path("/records")
 public class EmployeeRecords {
 
+    /**
+     * Simple health check endpoint to verify that the service is online.
+     *
+     * @return HTTP 200 response with a plain text message "Service online"
+     */
     @GET
     @Path("/ping")
     public Response ping() {
         return Response.ok().entity("Service online").build();
     }
 
+    /**
+     * Retrieves all departments from the database.
+     *
+     * @return HTTP 200 response containing a JSON list of {@link Departments}
+     * if found, or HTTP 404 if the employee does not exist.
+     */
     @GET
     @Path("/allDepartments")
     @Produces(MediaType.APPLICATION_JSON)
@@ -38,7 +64,13 @@ public class EmployeeRecords {
         return Response.ok().entity(departmentsList).build();
     }
 
-    // Endpoint 2: return full employee record
+    /**
+     * Retrieves the full employee record for a given employee number.
+     *
+     * @param empNo Employee number (primary key in the database)
+     * @return HTTP 200 response with {@link Employees} JSON if found,
+     *         or HTTP 404 if the employee does not exist.
+     */
     @GET
     @Path("/{empNo}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -60,8 +92,6 @@ public class EmployeeRecords {
         }
         return Response.ok().entity(emp).build();
     }
-
-    //endpoint 3
 
     /**
      * GET endpoint to retrieve all employees for a given department and optional page number
@@ -127,7 +157,22 @@ public class EmployeeRecords {
         return Response.ok().entity(deptEmpDTO).build();
     }
 
-    // Endpoint 4: Promotions
+    /**
+     * Promotes an employee by updating their title and salary.
+     * <p>
+     * The {@link PromotionDTO} must contain:
+     * <ul>
+     *     <li>empNo - Employee number (positive integer)</li>
+     *     <li>deptNo - Department number (non-empty string)</li>
+     *     <li>newTitle - New job title (non-empty string)</li>
+     *     <li>newSalary - New salary (positive integer)</li>
+     * </ul>
+     *
+     * @param promote Promotion details encapsulated in {@link PromotionDTO}
+     * @return HTTP 201 response with the promotion details if successful,
+     *         HTTP 400 for invalid inputs or runtime errors,
+     *         HTTP 500 if an unexpected error occurs.
+     */
     @POST
     @Path("/promote")
     @Consumes(MediaType.APPLICATION_JSON)
