@@ -14,7 +14,7 @@ import java.util.Objects;
         @NamedQuery(name="DeptManager.IsPastManagerDept", query = "SELECT COUNT(dm) FROM Dept_manager dm WHERE dm.id" +
                 ".empNo = :empNo AND dm.id.deptNo = :deptNo"),
         @NamedQuery(name="DeptManager.findRecord", query ="SELECT dm FROM Dept_manager dm WHERE dm.id.empNo = :empNo " +
-                "AND dm.id.deptNo = :deptNo AND dm.toDate = :maxDate")
+                "AND dm.id.deptNo = :deptNo AND dm.toDate > :toDate")
 })
 
 public class Dept_manager {

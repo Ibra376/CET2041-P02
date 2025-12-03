@@ -58,7 +58,7 @@ public class PromotionDAO {
                 boolean isManager = newTitle != null &&
                         newTitle.toLowerCase().contains("manager");
 
-                boolean prevManager = previousTitle != null && previousTitle.toLowerCase().contains("manager");
+                boolean prevManager = (previousTitle != null) && previousTitle.toLowerCase().contains("manager");
 
                 boolean deptChanged = !previousDept.equals(deptNo);
                 //1. previously manager, and no longer a manager
@@ -74,11 +74,10 @@ public class PromotionDAO {
                     Dept_manager previousRecord =  em.createNamedQuery("DeptManager.findRecord", Dept_manager.class)
                             .setParameter("empNo", empNo)
                             .setParameter("deptNo", previousDept)
-                            .setParameter("maxDate", maxDate)
+                            .setParameter("toDate", today)
                             .getSingleResult();
 
                     previousRecord.setToDate(today);
-                    System.out.println(previousRecord.getToDate());
                 }
 
                 em.getTransaction().commit();
@@ -166,7 +165,7 @@ public class PromotionDAO {
 
             if(Objects.equals(previousTitle, newTitle)){
                 noUpdateCounter++;
-                return ""; // no change needed
+                return previousTitle; // no change needed
             }
             titles.setToDate(fromDate);
         }
@@ -212,7 +211,7 @@ public class PromotionDAO {
             previousDeptNo = deptEmp.getId().getDeptNo();
             if(Objects.equals(previousDeptNo, deptNo)){
                 noUpdateCounter++;
-                return ""; // no change needed
+                return previousDeptNo; // no change needed
             }
             deptEmp.setToDate(fromDate);
         }
