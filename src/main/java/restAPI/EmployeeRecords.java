@@ -199,28 +199,46 @@ public class EmployeeRecords {
         try {
             PromotionDAO promoDAO = new PromotionDAO(em);
 
-            // isManager is derived inside PromotionDAO from newTitle
-            promoDAO.promoteEmployee(
+            // DAO returns how many of the 3 tables did NOT need updating (0–3)
+            int noUpdateCounter = promoDAO.promoteEmployee(
                     promote.getEmpNo(),
                     promote.getDeptNo(),
                     promote.getNewTitle(),
                     promote.getNewSalary()
             );
 
+            // If title, salary and department were all unchanged
+            if (noUpdateCounter >= 3) {
+                return Response.ok()
+                        .entity("No changes were applied. Employee " + promote.getEmpNo()
+                                + " already has the same title, salary and department.")
+                        .build();
+            }
+
+            // At least one change was applied
             return Response.status(Response.Status.CREATED)
-                    .entity("Employee with empNo: "+ promote.getEmpNo() + "is successfully promoted." ).build();
+                    .entity("Employee with empNo: " + promote.getEmpNo()
+                            + " is successfully promoted.")
+                    .build();
 
-
-        } catch (RuntimeException ex) {
-
+        } catch (IllegalStateException ex) {
+            // Business rule violations thrown by PromotionDAO
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Error: " + ex.getMessage())
                     .build();
+
+        } catch (RuntimeException ex) {
+            // Other runtime issues
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Error: " + ex.getMessage())
+                    .build();
+
         } catch (Exception e) {
             e.printStackTrace();
             return Response.serverError()
                     .entity("{\"error\":\"Failed to process promotion\"}")
                     .build();
+
         } finally {
             em.close();
         }
