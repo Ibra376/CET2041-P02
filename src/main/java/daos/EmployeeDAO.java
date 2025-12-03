@@ -32,6 +32,22 @@ public class EmployeeDAO {
     }
 
     public Employees findEmployee(int id) {
+
+        Employees emp =  em.find(Employees.class, id);
+        if (emp != null) {
+            if (emp.getSalary() != null) {
+                emp.getSalary().size();
+            }
+            if (emp.getTitles() != null) {
+                emp.getTitles().size();
+            }
+            if (emp.getDept_emp() != null) {
+                emp.getDept_emp().size();
+            }
+            if (emp.getDept_manager() != null) {
+                emp.getDept_manager().size();
+            }
+        }
         return em.find(Employees.class, id);
     }
 }
