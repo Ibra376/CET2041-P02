@@ -38,7 +38,7 @@ public class PromotionDAO {
             }
 
             Departments dept = em.find(Departments.class, deptNo);
-            if (dept == null) {
+            if (dept == null || !dept.getDeptNo().equals(deptNo)) {
                 throw new RuntimeException("Department not found: " + deptNo);
             }
 
@@ -148,10 +148,7 @@ public class PromotionDAO {
                 .setParameter("fromDate", fromDate)
                 .getSingleResult() > 0;
 
-        if(titleUpdatedToday){
-            throw new IllegalStateException("title cannot be changed more than once on the same day with the " +
-                    "same (empNo, title, fromDate).");
-        }
+
 
         Titles titles;
         String previousTitle;
@@ -167,6 +164,12 @@ public class PromotionDAO {
                 noUpdateCounter++;
                 return previousTitle; // no change needed
             }
+
+            if(titleUpdatedToday){
+                throw new IllegalStateException("title cannot be changed more than once on the same day with the " +
+                        "same (empNo, title, fromDate).");
+            }
+
             titles.setToDate(fromDate);
         }
         catch(NoResultException e){
@@ -196,9 +199,7 @@ public class PromotionDAO {
                 .setParameter("maxDate", toDate)
                 .getSingleResult() ) > 0;
 
-        if(IsPastDept){
-            throw new IllegalStateException("Employee cannot move back to a past department");
-        }
+
         Dept_emp deptEmp;
         String previousDeptNo;
         try{
@@ -213,6 +214,11 @@ public class PromotionDAO {
                 noUpdateCounter++;
                 return previousDeptNo; // no change needed
             }
+
+            if(IsPastDept){
+                throw new IllegalStateException("Employee cannot move back to a past department");
+            }
+
             deptEmp.setToDate(fromDate);
         }
         catch(NoResultException e){
