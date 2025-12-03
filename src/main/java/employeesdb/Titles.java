@@ -10,16 +10,6 @@ import java.util.Objects;
 
 /**
  * Represents the {@code titles} table in the Employees database.
- * <p>
- * This entity models job titles held by employees, including the title name,
- * start and end dates, and the relationship to the {@link Employees} entity.
- * </p>
- *
- * <p>Named queries:</p>
- * <ul>
- *   <li>{@code titles.findCurrent} - Finds the current title record for a given employee.</li>
- *   <li>{@code titles.updatedToday} - Checks if a title record was updated today for a given employee.</li>
- * </ul>
  */
 @Entity
 @Table(name = "titles")

@@ -9,11 +9,6 @@ import java.util.List;
 
 /**
  * Represents the {@code employees} table in the Employees database.
- * <p>
- * This entity models an employee record, including personal details,
- * employment dates, and relationships to salaries, titles, and department
- * assignments.
- * </p>
  */
 @Entity
 @Table(name="employees")

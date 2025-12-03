@@ -11,16 +11,6 @@ import java.util.Objects;
 
 /**
  * Represents the {@code salaries} table in the Employees database.
- * <p>
- * This entity models salary records for employees, including salary amount,
- * start and end dates, and the relationship to the {@link Employees} entity.
- * </p>
- *
- * <p>Named queries:</p>
- * <ul>
- *   <li>{@code salaries.findCurrent} - Finds the current salary record for a given employee.</li>
- *   <li>{@code salaries.updatedToday} - Checks if a salary record was updated today for a given employee.</li>
- * </ul>
  */
 @Entity
 @Table(name="salaries")

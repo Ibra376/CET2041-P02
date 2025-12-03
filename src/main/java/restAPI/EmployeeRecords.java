@@ -15,18 +15,6 @@ import java.util.List;
 
 /**
  * REST API resource class that exposes endpoints for managing and retrieving employee records.
- * <p>
- * Provides functionality to:
- * <ul>
- *     <li>Ping the service to check availability</li>
- *     <li>Retrieve all departments</li>
- *     <li>Retrieve a full employee record by employee number</li>
- *     <li>Retrieve employees by department with pagination</li>
- *     <li>Promote an employee with updated title and salary</li>
- * </ul>
- *
- * Base path: {@code /records}
-
  */
 @Path("/records")
 public class EmployeeRecords {
