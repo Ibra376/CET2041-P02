@@ -2,6 +2,7 @@ package employeesdb;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.inject.Named;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -12,7 +13,8 @@ import java.util.Objects;
 @NamedQueries({
         @NamedQuery(name="DeptManager.IsPastManagerDept", query = "SELECT COUNT(dm) FROM Dept_manager dm WHERE dm.id" +
                 ".empNo = :empNo AND dm.id.deptNo = :deptNo"),
-
+        @NamedQuery(name="DeptManager.findRecord", query ="SELECT dm FROM Dept_manager dm WHERE dm.id.empNo = :empNo " +
+                "AND dm.id.deptNo = :deptNo AND dm.toDate = :maxDate")
 })
 
 public class Dept_manager {

@@ -42,21 +42,43 @@ public class PromotionDAO {
                 throw new RuntimeException("Department not found: " + deptNo);
             }
 
+            Dept_emp deptEmp = em.find(Dept_emp.class, new Dept_emp.DeptEmpId(empNo, deptNo));
+
+
             LocalDate today = LocalDate.now();
             LocalDate maxDate = LocalDate.of(9999, 1, 1);
 
             noUpdateCounter =0;
-            updateTitle(empNo, emp, today, maxDate, newTitle);
+            String previousTitle = updateTitle(empNo, emp, today, maxDate, newTitle);
             updateSalary(empNo, emp, today, maxDate, newSalary);
-            updateDeptEmp(empNo, emp, deptNo, dept, today,maxDate);
+            String previousDept = updateDeptEmp(empNo, emp, deptNo, dept, today,maxDate);
 
             //if at least one table was updated, otherwise no need to run the manager check and commit
             if (noUpdateCounter <3) {
                 boolean isManager = newTitle != null &&
                         newTitle.toLowerCase().contains("manager");
 
+                boolean prevManager = previousTitle != null && previousTitle.toLowerCase().contains("manager");
+
+                boolean deptChanged = !previousDept.equals(deptNo);
+                //1. previously manager, and no longer a manager
+                //2. previously manager for a department, moved to another department and is still a manager
+                boolean wasManager = (prevManager && !isManager) || (prevManager && isManager && deptChanged);
+
                 if (isManager) {
                     updateDeptManager(empNo, emp, deptNo, dept, today, maxDate);
+                }
+
+                //update the previous manager if necessary
+                if (wasManager) {
+                    Dept_manager previousRecord =  em.createNamedQuery("DeptManager.findRecord", Dept_manager.class)
+                            .setParameter("empNo", empNo)
+                            .setParameter("deptNo", previousDept)
+                            .setParameter("maxDate", maxDate)
+                            .getSingleResult();
+
+                    previousRecord.setToDate(today);
+                    System.out.println(previousRecord.getToDate());
                 }
 
                 em.getTransaction().commit();
@@ -117,7 +139,8 @@ public class PromotionDAO {
 
     }
 
-    private void updateTitle(int empNo, Employees emp, LocalDate fromDate, LocalDate toDate, String newTitle){
+    //returns the previous title => so can update the manager table
+    private String updateTitle(int empNo, Employees emp, LocalDate fromDate, LocalDate toDate, String newTitle){
 
         //title cannot be inserted twice with the same (empNo, title, fromDate)
         boolean titleUpdatedToday = em.createNamedQuery("titles.updatedToday", Long.class)
@@ -132,15 +155,18 @@ public class PromotionDAO {
         }
 
         Titles titles;
+        String previousTitle;
         try{
             titles = em.createNamedQuery("titles.findCurrent",  Titles.class)
                     .setParameter("empNo", empNo)
                     .setParameter("maxDate", toDate)
                     .getSingleResult();
 
-            if(Objects.equals(titles.getTitle(), newTitle)){
+            previousTitle = titles.getTitle();
+
+            if(Objects.equals(previousTitle, newTitle)){
                 noUpdateCounter++;
-                return; // no change needed
+                return ""; // no change needed
             }
             titles.setToDate(fromDate);
         }
@@ -156,9 +182,12 @@ public class PromotionDAO {
         Titles newTitleEntity =
                 new Titles(titlesId, toDate, emp);
         em.persist(newTitleEntity);
+
+
+        return previousTitle;
     }
 
-    private void updateDeptEmp(int empNo, Employees emp, String deptNo, Departments dept, LocalDate fromDate,
+    private String updateDeptEmp(int empNo, Employees emp, String deptNo, Departments dept, LocalDate fromDate,
                                LocalDate toDate){
 
         //employee cannot move back to a past department (database constraint)
@@ -172,15 +201,18 @@ public class PromotionDAO {
             throw new IllegalStateException("Employee cannot move back to a past department");
         }
         Dept_emp deptEmp;
+        String previousDeptNo;
         try{
+
             deptEmp = em.createNamedQuery("DeptEmp.findCurrent",  Dept_emp.class)
                     .setParameter("empNo", empNo)
                     .setParameter("maxDate", toDate)
                     .getSingleResult();
 
-            if(Objects.equals(deptEmp.getId().getDeptNo(), deptNo)){
+            previousDeptNo = deptEmp.getId().getDeptNo();
+            if(Objects.equals(previousDeptNo, deptNo)){
                 noUpdateCounter++;
-                return; // no change needed
+                return ""; // no change needed
             }
             deptEmp.setToDate(fromDate);
         }
@@ -201,6 +233,7 @@ public class PromotionDAO {
         newDeptEmp.setDepartment(dept);
 
         em.persist(newDeptEmp);
+        return previousDeptNo;
     }
 
     private void updateDeptManager(int empNo,
@@ -221,35 +254,7 @@ public class PromotionDAO {
             throw new IllegalStateException("Employee cannot be promoted to Manager in the same Department " +
                     "again");
         }
-        Dept_manager currentManager = null;
 
-        // this one is not needed? current manager no need to be updated, just need to insert a new row
-
-        try {
-            // Get the current active manager for this department (if any)
-            currentManager = em.createQuery(
-                            "SELECT dm FROM Dept_manager dm " +
-                                    "WHERE dm.department.deptNo = :deptNo " +
-                                    "AND dm.toDate = :maxDate",
-                            Dept_manager.class
-                    )
-                    .setParameter("deptNo", deptNo)
-                    .setParameter("maxDate", toDate)
-                    .getSingleResult();
-
-            // If the same employee is already the manager of this dept, do nothing
-            if (currentManager.getId().getEmpNo() == empNo) {
-                return;
-            }
-
-            // Close current manager row
-            currentManager.setToDate(fromDate);
-
-        } catch (NoResultException e) {
-            // No current manager for this dept → that's fine, first manager
-        } catch (NonUniqueResultException e) {
-            throw new IllegalStateException("more than 1 active DeptManager record detected for dept " + deptNo, e);
-        }
         // Insert new dept_manager row
         Dept_manager.DeptManagerId dmId =
                 new Dept_manager.DeptManagerId(empNo, deptNo);
