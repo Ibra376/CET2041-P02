@@ -10,8 +10,13 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "titles")
-@NamedQuery(name = "titles.findCurrent", query = "SELECT t FROM Titles t " +
-        "WHERE t.titlesId.empNo = :empNo AND t.toDate = :maxDate")
+@NamedQueries({
+        @NamedQuery(name = "titles.findCurrent", query = "SELECT t FROM Titles t " +
+                "WHERE t.titlesId.empNo = :empNo AND t.toDate = :maxDate"),
+        @NamedQuery(name ="titles.updatedToday", query="SELECT COUNT(t) FROM Titles t WHERE t.titlesId.empNo =:empNo " +
+                "AND t.titlesId.title = :title AND t.titlesId.fromDate = :fromDate")
+})
+
 public class Titles {
     @EmbeddedId
     private  TitlesId titlesId;

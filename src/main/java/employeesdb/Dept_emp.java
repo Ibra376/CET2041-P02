@@ -14,8 +14,7 @@ import java.util.Objects;
         @NamedQuery(name = "DeptEmp.findCurrent", query = "SELECT de from Dept_emp de WHERE de.id.empNo = :empNo " +
                 "AND de.toDate = :maxDate"),
         @NamedQuery(name = "DeptEmp.findPastRecord", query = "SELECT COUNT(de) from Dept_emp de WHERE de.id.empNo = " +
-                ":empNo " +
-                "AND de.id.deptNo = :deptNo")
+                ":empNo AND de.id.deptNo = :deptNo AND de.toDate != :maxDate")
 })
 
 public class Dept_emp {

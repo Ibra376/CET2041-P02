@@ -11,18 +11,19 @@ import jakarta.persistence.NoResultException;
 import jakarta.persistence.NonUniqueResultException;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Objects;
 
 public class PromotionDAO {
 
     protected EntityManager em;
 
+    private static int noUpdateCounter =0;
+
     public PromotionDAO(EntityManager em) {
         this.em = em;
     }
 
-    public void promoteEmployee(
+    public int promoteEmployee(
             int empNo,
             String deptNo,
             String newTitle,
@@ -44,18 +45,23 @@ public class PromotionDAO {
             LocalDate today = LocalDate.now();
             LocalDate maxDate = LocalDate.of(9999, 1, 1);
 
+            noUpdateCounter =0;
             updateTitle(empNo, emp, today, maxDate, newTitle);
             updateSalary(empNo, emp, today, maxDate, newSalary);
             updateDeptEmp(empNo, emp, deptNo, dept, today,maxDate);
 
-            boolean isManager = newTitle != null &&
-                    newTitle.toLowerCase().contains("manager");
+            //if at least one table was updated, otherwise no need to run the manager check and commit
+            if (noUpdateCounter <3) {
+                boolean isManager = newTitle != null &&
+                        newTitle.toLowerCase().contains("manager");
 
-            if (isManager) {
-                updateDeptManager(empNo, emp, deptNo, dept, today, maxDate);
+                if (isManager) {
+                    updateDeptManager(empNo, emp, deptNo, dept, today, maxDate);
+                }
+
+                em.getTransaction().commit();
             }
 
-            em.getTransaction().commit();
 
         } catch (Exception e) {
             if (em.getTransaction().isActive()) {
@@ -63,10 +69,21 @@ public class PromotionDAO {
             }
             throw e;
         }
+
+        return noUpdateCounter;
     }
 
     private void updateSalary(int empNo, Employees emp, LocalDate fromDate, LocalDate toDate, int newSalary){
+
+        //salary cannot be updated more than once per day due to database constraint
+        boolean salaryUpdatedToday = ( em.createNamedQuery("salaries.updatedToday", Long.class)
+                .setParameter("fromDate", fromDate)
+                .setParameter("empNo", empNo)
+                .getSingleResult() > 0) ;
+
+
         Salaries salaries ;
+
         try{
             salaries = em.createNamedQuery("salaries.findCurrent", Salaries.class)
                     .setParameter("empNo", empNo)
@@ -74,15 +91,20 @@ public class PromotionDAO {
                     .getSingleResult();
 
             if(salaries.getSalary() == newSalary){
+                noUpdateCounter++;
                 return; // no change needed
+            }
+
+            if(salaryUpdatedToday){
+                throw new IllegalStateException("salary cannot be changed more than once on the same day.");
             }
             salaries.setToDate(fromDate);
         }
         catch(NoResultException e){
-            throw new IllegalStateException("Error: no current salary found for employee", e);
+            throw new IllegalStateException("no current salary found for employee", e);
         }
         catch(NonUniqueResultException e){
-            throw new IllegalStateException("Error: more than 1 row of current salary detected", e);
+            throw new IllegalStateException("more than 1 row of current salary detected", e);
         }
 
         Salaries.SalariesId salariesId =
@@ -91,9 +113,24 @@ public class PromotionDAO {
                 new Salaries(salariesId, newSalary, toDate, emp);
 
         em.persist(newSalaryEntity);
+
+
     }
 
     private void updateTitle(int empNo, Employees emp, LocalDate fromDate, LocalDate toDate, String newTitle){
+
+        //title cannot be inserted twice with the same (empNo, title, fromDate)
+        boolean titleUpdatedToday = em.createNamedQuery("titles.updatedToday", Long.class)
+                .setParameter("empNo", empNo)
+                .setParameter("title", newTitle)
+                .setParameter("fromDate", fromDate)
+                .getSingleResult() > 0;
+
+        if(titleUpdatedToday){
+            throw new IllegalStateException("title cannot be changed more than once on the same day with the " +
+                    "same (empNo, title, fromDate).");
+        }
+
         Titles titles;
         try{
             titles = em.createNamedQuery("titles.findCurrent",  Titles.class)
@@ -102,15 +139,16 @@ public class PromotionDAO {
                     .getSingleResult();
 
             if(Objects.equals(titles.getTitle(), newTitle)){
+                noUpdateCounter++;
                 return; // no change needed
             }
             titles.setToDate(fromDate);
         }
         catch(NoResultException e){
-            throw new IllegalStateException("Error: no current title found for employee", e);
+            throw new IllegalStateException("no current title found for employee", e);
         }
         catch(NonUniqueResultException e){
-            throw new IllegalStateException("Error: more than 1 row of current title detected", e);
+            throw new IllegalStateException("more than 1 row of current title detected", e);
         }
 
         Titles.TitlesId titlesId =
@@ -122,6 +160,17 @@ public class PromotionDAO {
 
     private void updateDeptEmp(int empNo, Employees emp, String deptNo, Departments dept, LocalDate fromDate,
                                LocalDate toDate){
+
+        //employee cannot move back to a past department (database constraint)
+        boolean IsPastDept = ( em.createNamedQuery("DeptEmp.findPastRecord", Long.class)
+                .setParameter("empNo", empNo)
+                .setParameter("deptNo", deptNo)
+                .setParameter("maxDate", toDate)
+                .getSingleResult() ) > 0;
+
+        if(IsPastDept){
+            throw new IllegalStateException("Employee cannot move back to a past department");
+        }
         Dept_emp deptEmp;
         try{
             deptEmp = em.createNamedQuery("DeptEmp.findCurrent",  Dept_emp.class)
@@ -130,25 +179,19 @@ public class PromotionDAO {
                     .getSingleResult();
 
             if(Objects.equals(deptEmp.getId().getDeptNo(), deptNo)){
+                noUpdateCounter++;
                 return; // no change needed
             }
             deptEmp.setToDate(fromDate);
         }
         catch(NoResultException e){
-            throw new IllegalStateException("Error: no current DeptEmp record found for employee", e);
+            throw new IllegalStateException("no current DeptEmp record found for employee", e);
         }
         catch(NonUniqueResultException e){
-            throw new IllegalStateException("Error: more than 1 row of current DeptEmp records detected", e);
+            throw new IllegalStateException("more than 1 row of current DeptEmp records detected", e);
         }
 
-        boolean IsPastDept = ( em.createNamedQuery("DeptEmp.findPastRecord", Long.class)
-                .setParameter("empNo", empNo)
-                .setParameter("deptNo", deptNo)
-                .getSingleResult() ) > 0;
 
-        if(IsPastDept){
-            throw new IllegalStateException("Error: Employee cannot move back to a past department");
-        }
         Dept_emp.DeptEmpId deptEmpId =
                 new Dept_emp.DeptEmpId(empNo, deptNo);
 
@@ -167,7 +210,20 @@ public class PromotionDAO {
                                    LocalDate fromDate,
                                    LocalDate toDate) {
 
+        //check if the same employee had been the manager for the same department in the past (composite key
+        // restriction)
+        boolean isPastManager = em.createNamedQuery("DeptManager.IsPastManagerDept", Long.class)
+                .setParameter("empNo", empNo)
+                .setParameter("deptNo", deptNo)
+                .getSingleResult() > 0;
+
+        if(isPastManager){
+            throw new IllegalStateException("Employee cannot be promoted to Manager in the same Department " +
+                    "again");
+        }
         Dept_manager currentManager = null;
+
+        // this one is not needed? current manager no need to be updated, just need to insert a new row
 
         try {
             // Get the current active manager for this department (if any)
@@ -192,7 +248,7 @@ public class PromotionDAO {
         } catch (NoResultException e) {
             // No current manager for this dept → that's fine, first manager
         } catch (NonUniqueResultException e) {
-            throw new IllegalStateException("Error: more than 1 active DeptManager record detected for dept " + deptNo, e);
+            throw new IllegalStateException("more than 1 active DeptManager record detected for dept " + deptNo, e);
         }
         // Insert new dept_manager row
         Dept_manager.DeptManagerId dmId =
