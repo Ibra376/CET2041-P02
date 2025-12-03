@@ -13,22 +13,44 @@ import jakarta.persistence.NonUniqueResultException;
 import java.time.LocalDate;
 import java.util.Objects;
 
+/**
+ * Data Access Object for handling employee promotions
+ * This DAO provides methods to update dept_emp, dept_manager, salaries and titles tables in the database when an
+ * employee is promoted
+ *
+ * All database operations use the provided EntityManager
+ */
 public class PromotionDAO {
 
+    /**
+     * EntityManager used to perform database operations.
+     */
     protected EntityManager em;
 
+    /**
+     * counter to track if any database updates were made during the promotion process.
+     */
     private static int noUpdateCounter =0;
 
+    /**
+     * Constructor for PromotionDAO and takes EntityManager as an input.
+     * @param em the Entity Manager instance for database access.
+     */
     public PromotionDAO(EntityManager em) {
         this.em = em;
     }
 
-    public int promoteEmployee(
-            int empNo,
-            String deptNo,
-            String newTitle,
-            int newSalary) {
-
+    /**
+     * Promotes an employee by updating their title, salary, department assignment,
+     * and manager status as necessary.
+     *
+     * @param empNo employee number
+     * @param deptNo the target department number
+     * @param newTitle the new job title
+     * @param newSalary the new salary
+     * @return the number of tables not updated in the process
+     */
+    public int promoteEmployee(int empNo, String deptNo, String newTitle, int newSalary) {
         try {
             em.getTransaction().begin();
 
@@ -37,13 +59,13 @@ public class PromotionDAO {
                 throw new RuntimeException("Employee not found: " + empNo);
             }
 
+            deptNo = deptNo.toLowerCase();
             Departments dept = em.find(Departments.class, deptNo);
-            if (dept == null || !dept.getDeptNo().equals(deptNo)) {
+            if (dept == null) {
                 throw new RuntimeException("Department not found: " + deptNo);
             }
 
             Dept_emp deptEmp = em.find(Dept_emp.class, new Dept_emp.DeptEmpId(empNo, deptNo));
-
 
             LocalDate today = LocalDate.now();
             LocalDate maxDate = LocalDate.of(9999, 1, 1);
@@ -55,12 +77,10 @@ public class PromotionDAO {
 
             //if at least one table was updated, otherwise no need to run the manager check and commit
             if (noUpdateCounter <3) {
-                boolean isManager = newTitle != null &&
-                        newTitle.toLowerCase().contains("manager");
-
+                boolean isManager = newTitle != null && newTitle.toLowerCase().contains("manager");
                 boolean prevManager = (previousTitle != null) && previousTitle.toLowerCase().contains("manager");
-
                 boolean deptChanged = !previousDept.equals(deptNo);
+
                 //1. previously manager, and no longer a manager
                 //2. previously manager for a department, moved to another department and is still a manager
                 boolean wasManager = (prevManager && !isManager) || (prevManager && isManager && deptChanged);
@@ -83,7 +103,6 @@ public class PromotionDAO {
                 em.getTransaction().commit();
             }
 
-
         } catch (Exception e) {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
@@ -94,6 +113,15 @@ public class PromotionDAO {
         return noUpdateCounter;
     }
 
+    /**
+     * Updates the employee's salary by closing the current salary record
+     * and inserting a new one with the new amount.
+     * @param empNo employee number
+     * @param emp employee entity
+     * @param fromDate the start date of the salary change (usually today)
+     * @param toDate the end date of the salary change (usually maxDate)
+     * @param newSalary new salary amount
+     */
     private void updateSalary(int empNo, Employees emp, LocalDate fromDate, LocalDate toDate, int newSalary){
 
         //salary cannot be updated more than once per day due to database constraint
@@ -102,9 +130,7 @@ public class PromotionDAO {
                 .setParameter("empNo", empNo)
                 .getSingleResult() > 0) ;
 
-
         Salaries salaries ;
-
         try{
             salaries = em.createNamedQuery("salaries.findCurrent", Salaries.class)
                     .setParameter("empNo", empNo)
@@ -135,10 +161,23 @@ public class PromotionDAO {
 
         em.persist(newSalaryEntity);
 
-
     }
 
-    //returns the previous title => so can update the manager table
+
+    /**
+     *  Updates the employee's title by closing the current title record
+     *  and inserting a new one with the new title.
+     *
+     *  Returns the previous title for potential updates to manager records.
+     *  Ensures a title cannot be changed more than once on the same day with the same (empNo, title, fromDate).
+     *
+     * @param empNo employee number
+     * @param emp employee entity
+     * @param fromDate the start date of the salary change (usually today)
+     * @param toDate the end date of the salary change (usually maxDate)
+     * @param newTitle the new title
+     * @return a String representing the previous title
+     */
     private String updateTitle(int empNo, Employees emp, LocalDate fromDate, LocalDate toDate, String newTitle){
 
         //title cannot be inserted twice with the same (empNo, title, fromDate)
@@ -189,6 +228,19 @@ public class PromotionDAO {
         return previousTitle;
     }
 
+    /**
+     *  Updates the employee's department assignment by closing the current record
+     *  and inserting a new one.
+     *  Prevents moving back to a past department (database constraint) and returns a String representing the
+     *  previous deptNo.
+     * @param empNo employee number
+     * @param emp employee entity
+     * @param deptNo the target deptNo
+     * @param dept the target departmemnt
+     * @param fromDate the start date of the salary change (usually today)
+     * @param toDate the end date of the salary change (usually maxDate)
+     * @return a String representing the previous deptNo
+     */
     private String updateDeptEmp(int empNo, Employees emp, String deptNo, Departments dept, LocalDate fromDate,
                                LocalDate toDate){
 
@@ -241,12 +293,17 @@ public class PromotionDAO {
         return previousDeptNo;
     }
 
-    private void updateDeptManager(int empNo,
-                                   Employees emp,
-                                   String deptNo,
-                                   Departments dept,
-                                   LocalDate fromDate,
-                                   LocalDate toDate) {
+    /**
+     * Inserts a new manager record for the employee in a department.
+     * Checks if the employee has previously managed the same department and prevents duplicate manager entries.
+     * @param empNo employee number
+     * @param emp employee entity
+     * @param deptNo the target deptNo
+     * @param dept the target departmemnt
+     * @param fromDate the start date of the manager change (usually today)
+     * @param toDate the end date of the manager change (usually maxDate)
+     */
+    private void updateDeptManager(int empNo, Employees emp, String deptNo, Departments dept, LocalDate fromDate, LocalDate toDate) {
 
         //check if the same employee had been the manager for the same department in the past (composite key
         // restriction)
