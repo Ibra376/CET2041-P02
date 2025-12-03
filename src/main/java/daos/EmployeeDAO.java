@@ -48,6 +48,6 @@ public class EmployeeDAO {
                 emp.getDept_manager().size();
             }
         }
-        return em.find(Employees.class, id);
+        return emp;
     }
 }
